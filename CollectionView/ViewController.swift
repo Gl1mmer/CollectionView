@@ -9,23 +9,23 @@ import UIKit
 
 final class ViewController: UIViewController {
     
-    private var spiderMenInfo = [
-        [UIImage(named: "tom") : "Tom Holland"],
-        [UIImage(named: "tob") : "Tobey Maguire"],
-        [UIImage(named: "and") : "Andrew Garfield"]
-    ]
+    var photoManager = randomPhotoManager()
+    
+    var randomImages: [UIImage] = []
+    var namings: [String] = []
     
     private let topLabel: UILabel = {
         let label = UILabel()
-        label.text = "SPIDER-MEN"
+        label.text = "Random Photo Generator"
+        label.numberOfLines = 0
         label.textColor = .white
         label.textAlignment = .center
         label.backgroundColor = .clear
         label.translatesAutoresizingMaskIntoConstraints = false
-        if let customBoldItalicFont = UIFont(name: "Helvetica-BoldOblique", size: 40) {
+        if let customBoldItalicFont = UIFont(name: "Helvetica-BoldOblique", size: 32) {
                 label.font = customBoldItalicFont
             } else {
-                label.font = .systemFont(ofSize: 40, weight: .bold)
+                label.font = .systemFont(ofSize: 32, weight: .bold)
             }
         return label
     }()
@@ -64,6 +64,15 @@ final class ViewController: UIViewController {
         
         collectionView.delegate = self
         collectionView.dataSource = self
+        
+        photoManager.fetchPhotos { images, namings  in
+            DispatchQueue.main.async {
+                self.randomImages = images
+                self.collectionView.reloadData()
+                self.namings = namings
+            }
+        }
+        
     }
     
     private func setupBackgroundUI() {
@@ -117,17 +126,14 @@ final class ViewController: UIViewController {
 extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return spiderMenInfo.count
+        return randomImages.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CustomCollectionViewCell.identifier, for: indexPath) as? CustomCollectionViewCell else {
             fatalError("Error ept")
         }
-        if let image = spiderMenInfo[indexPath.row].keys.first,
-           let name = spiderMenInfo[indexPath.row].values.first {
-               cell.configure(with: image, name: name)
-           }
+        cell.configure(with: randomImages[indexPath.row], name: namings[indexPath.row])
         return cell
     }
 }
@@ -142,3 +148,4 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         return UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
     }
 }
+
